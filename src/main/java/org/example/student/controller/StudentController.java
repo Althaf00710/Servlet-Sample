@@ -1,5 +1,7 @@
 package org.example.student.controller;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -27,8 +29,11 @@ public class StudentController extends HttpServlet {
                 case "/view":
                     viewStudents(request, response);
                     break;
+                case "/get":
+                    getStudent(request, response);
+                    break;
                 case "/search":
-                    //searchStudent(request, response);
+                    searchStudents(request, response);
                     break;
                 default:
                     show404(request, response);
@@ -64,33 +69,50 @@ public class StudentController extends HttpServlet {
 
     }
 
+    private void searchStudents(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+
+    }
+
     private void viewStudents(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        List<Student> students = studentDAO.getStudents();
+        List<Student> students = studentDAO.getStudent();
         request.setAttribute("students", students);
         RequestDispatcher dispatcher = request.getRequestDispatcher("/index.jsp");
         dispatcher.forward(request, response);
     }
 
-    private void searchStudent(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-//        int id = Integer.parseInt(request.getParameter("id"));
-//        Student student = studentDAO.getStudent(id);
-//
-//        if (student != null) {
-//            request.setAttribute("student", student);
-//            RequestDispatcher dispatcher = request.getRequestDispatcher("/index.jsp");
-//            dispatcher.forward(request, response);
-//        } else {
-//            response.sendError(HttpServletResponse.SC_NOT_FOUND, "Student not found.");
-//        }
+    private void getStudent(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+
+        int id = Integer.parseInt(request.getParameter("id"));
+        Student student = studentDAO.getStudent(id);
+
+        Gson gson = new Gson();
+        JsonObject jsonResponse = new JsonObject();
+
+        if (student != null) {
+            String studentJson = gson.toJson(student);
+            response.getWriter().write(studentJson);
+        } else {
+            jsonResponse.addProperty("error", "Student not found");
+            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+            response.getWriter().write(gson.toJson(jsonResponse));
+        }
     }
 
     private void addStudent(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
         String name = request.getParameter("name");
         int age = Integer.parseInt(request.getParameter("age"));
+        String address = request.getParameter("address");
+        String phone = request.getParameter("phone");
+        String gender = request.getParameter("gender");
 
         Student student = new Student();
         student.setName(name);
         student.setAge(age);
+        student.setAddress(address);
+        student.setPhone(phone);
+        student.setGender(gender);
 
         studentDAO.addStudent(student);
         response.sendRedirect(request.getContextPath() + "/students/view");
@@ -100,11 +122,18 @@ public class StudentController extends HttpServlet {
         int id = Integer.parseInt(request.getParameter("id"));
         String name = request.getParameter("name");
         int age = Integer.parseInt(request.getParameter("age"));
+        String address = request.getParameter("address");
+        String phone = request.getParameter("phone");
+        String gender = request.getParameter("gender");
+
 
         Student student = new Student();
         student.setId(id);
         student.setName(name);
         student.setAge(age);
+        student.setAddress(address);
+        student.setPhone(phone);
+        student.setGender(gender);
 
         studentDAO.updateStudent(student);
         response.sendRedirect(request.getContextPath() + "/students/view");

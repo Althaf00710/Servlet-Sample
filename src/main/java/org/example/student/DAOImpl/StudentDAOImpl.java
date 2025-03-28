@@ -37,7 +37,7 @@ public class StudentDAOImpl implements StudentDAO {
     }
 
     @Override
-    public List<Student> getStudents() {
+    public List<Student> getStudent() {
         List<Student> students = new ArrayList<>();
         String query = "SELECT * FROM Student";
 
@@ -110,5 +110,32 @@ public class StudentDAOImpl implements StudentDAO {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public List<Student> getStudentByName(String name) {
+        List<Student> students = new ArrayList<>();
+        String query = "SELECT * FROM Student WHERE name LIKE ?";
+
+        try (Connection connection = dbConfig.getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+
+            preparedStatement.setString(1, "%" + name + "%");
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            while (resultSet.next()) {
+                Student student = new Student();
+                student.setId(resultSet.getInt("id"));
+                student.setName(resultSet.getString("name"));
+                student.setAge(resultSet.getInt("age"));
+                student.setGender(resultSet.getString("gender"));
+                student.setAddress(resultSet.getString("address"));
+                student.setPhone(resultSet.getString("phone"));
+                students.add(student);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return students;
     }
 }

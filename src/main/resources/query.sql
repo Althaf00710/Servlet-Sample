@@ -7,6 +7,8 @@ CREATE TABLE Student (
                          phone VARCHAR(15) NOT NULL
 );
 
+SELECT * FROM Student;
+
 INSERT INTO Student (name, age, gender, address, phone)
 VALUES ('John Doe', 22, 'Male', '123 Main St, New York, NY', '123-456-7890');
 
